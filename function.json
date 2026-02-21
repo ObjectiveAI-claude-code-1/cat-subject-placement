@@ -1,0 +1,166 @@
+{
+  "type": "scalar.function",
+  "input_schema": {
+    "type": "object",
+    "description": "A cat photograph to evaluate for subject placement quality. The image should contain at least one cat as the apparent subject. The function does not detect whether a cat is present — it assumes the photograph has already been identified as a cat photograph.",
+    "properties": {
+      "cat_photograph": {
+        "type": "image",
+        "description": "A photograph of a cat to be evaluated for subject placement. The function examines this image to assess three qualities: positional intentionality (whether the cat's position within the frame feels deliberately chosen), spatial equilibrium (the visual balance between the cat and the surrounding space), and compositional gravity (whether the cat serves as a clear and stable center of gravity for the image). The photograph may be of any orientation, aspect ratio, or style — from tight close-ups to wide environmental shots."
+      }
+    },
+    "required": [
+      "cat_photograph"
+    ]
+  },
+  "tasks": [
+    {
+      "type": "vector.completion",
+      "messages": [
+        {
+          "role": "user",
+          "content": [
+            {
+              "$jmespath": "input.cat_photograph"
+            },
+            {
+              "type": "text",
+              "text": "Look at this cat photograph. Does the cat's position within the frame feel like it was deliberately chosen — as though the frame was drawn around the cat — or does the cat's placement feel accidental, as if it just happened to be there?"
+            }
+          ]
+        }
+      ],
+      "responses": [
+        [
+          {
+            "type": "text",
+            "text": "The cat's position feels very deliberate. The frame feels like it was composed specifically around where the cat is — the boundaries of the photograph exist because the cat is right there. This placement communicates a clear sense of decision."
+          }
+        ],
+        [
+          {
+            "type": "text",
+            "text": "The placement is passable. The cat's position has some relationship to the frame, but it doesn't feel like a strong compositional choice. It's neither clearly intentional nor obviously accidental."
+          }
+        ],
+        [
+          {
+            "type": "text",
+            "text": "The cat's position feels accidental. It looks like the cat just happened to be in the frame rather than being the reason for the frame. The placement creates no meaningful relationship with the edges or geometry of the image."
+          }
+        ]
+      ],
+      "output": {
+        "$starlark": "output['scores'][0] * 1.0 + output['scores'][1] * 0.5 + output['scores'][2] * 0.0"
+      }
+    },
+    {
+      "type": "vector.completion",
+      "messages": [
+        {
+          "role": "system",
+          "content": [
+            {
+              "type": "text",
+              "text": "You are a photography composition analyst. When shown a cat photograph, you assess the visual balance between the cat subject and the surrounding space. You consider whether the cat has appropriate breathing room, whether the distribution of visual weight feels stable, and whether any asymmetry in the frame is purposeful or creates unresolved tension."
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "content": [
+            {
+              "$jmespath": "input.cat_photograph"
+            },
+            {
+              "type": "text",
+              "text": "How is the visual balance between the cat and the surrounding space in this photograph?"
+            }
+          ]
+        }
+      ],
+      "responses": [
+        [
+          {
+            "type": "text",
+            "text": "The cat and its surrounding space are well-balanced. The cat has enough room to breathe without feeling stranded or lost. The distribution of visual weight feels stable and comfortable — any asymmetry in the frame is purposeful and resolved. The cat inhabits this frame naturally."
+          }
+        ],
+        [
+          {
+            "type": "text",
+            "text": "The balance is middling. The cat's relationship to the surrounding space isn't terrible, but something feels slightly off — perhaps a bit too much empty space on one side, or the cat sits a touch too close to an edge. There's mild tension between the subject and its surroundings."
+          }
+        ],
+        [
+          {
+            "type": "text",
+            "text": "The image feels unbalanced. The cat is either crammed against an edge with vast emptiness opposing it, pressed into a corner while clutter dominates the frame, or marooned in space without compositional reason. There is clear unresolved tension — the cat is fighting the frame rather than inhabiting it."
+          }
+        ]
+      ],
+      "output": {
+        "$starlark": "output['scores'][0] * 1.0 + output['scores'][1] * 0.5 + output['scores'][2] * 0.0"
+      }
+    },
+    {
+      "type": "vector.completion",
+      "messages": [
+        {
+          "role": "user",
+          "content": [
+            {
+              "type": "text",
+              "text": "I'm going to show you a photograph of a cat. When you look at it, tell me: does your eye go straight to the cat, or does it wander around the image?"
+            }
+          ]
+        },
+        {
+          "role": "assistant",
+          "content": [
+            {
+              "type": "text",
+              "text": "Sure, go ahead and share the photograph. I'll tell you where my eye lands first and whether the cat draws my attention as the clear focal point."
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "content": [
+            {
+              "$jmespath": "input.cat_photograph"
+            },
+            {
+              "type": "text",
+              "text": "Here it is. Where does your eye go?"
+            }
+          ]
+        }
+      ],
+      "responses": [
+        [
+          {
+            "type": "text",
+            "text": "My eye goes straight to the cat. It's the unmistakable focal point of this image — everything else in the frame supports it and exists in relation to it. The cat anchors the composition completely. This is a photograph that is clearly about the cat."
+          }
+        ],
+        [
+          {
+            "type": "text",
+            "text": "The cat gets my attention, but it has to compete a bit with other elements in the scene. My eye finds the cat, but it doesn't feel like the sole gravitational center — other objects or areas pull at my gaze somewhat."
+          }
+        ],
+        [
+          {
+            "type": "text",
+            "text": "My eye wanders around the image without settling confidently on the cat. The cat doesn't assert itself as the anchor — it carries about the same visual weight as other things in the frame. This feels like a photograph that happens to contain a cat rather than one that's about the cat."
+          }
+        ]
+      ],
+      "output": {
+        "$starlark": "output['scores'][0] * 1.0 + output['scores'][1] * 0.5 + output['scores'][2] * 0.0"
+      }
+    }
+  ],
+  "description": "Evaluates how well a cat is positioned within the frame of a photograph, returning a score from 0 to 1. Assesses three qualities: positional intentionality, spatial equilibrium, and compositional gravity. High scores mean the placement feels purposeful and anchored; low scores mean the cat feels accidental within the frame."
+}
